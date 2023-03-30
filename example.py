@@ -17,6 +17,6 @@ net.set_stack(
 
 net.fit([[1,0,1,0], [0,1,0,1]], [[1,0,1,0], [0,1,0,1]])
 
-net.save("model.pth")
+net.save("model.pt")
 
-net.load("model.pth")
+net.load("model.pt")
