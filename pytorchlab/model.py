@@ -163,11 +163,11 @@ class network(NeuralNetwork):
             device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
         
         # Handle batch size argument
-        if batch_size != None:
-            raise Exception("Custom batch size unsupported yet!")
+        # if batch_size != None:
+        #     raise Exception("Custom batch size unsupported yet!")
         
         # Create dataloaders:
-        train_dataloader, test_dataloader = self._create_dataloaders(trainX, trainY)
+        train_dataloader, test_dataloader = self._create_dataloaders(trainX, trainY, batch_size=batch_size)
         model = self.to(device)
 
         # Initialize optimizer:
