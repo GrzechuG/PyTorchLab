@@ -29,14 +29,15 @@ class network(NeuralNetwork):
         super().__init__()
 
     def create_stack(neuron_numbers):
-        params = []
-        for i in range(len(neuron_numbers)-1):
-            if i == 0:
-                params.append(nn.Linear(neuron_numbers[i],neuron_numbers[i+1]))
-            elif i == len(neuron_numbers)-2:
-                params.append(nn.Linear(neuron_numbers[i],neuron_numbers[i+1]))
-            else:
-                params.append(nn.Linear(neuron_numbers[i],neuron_numbers[i+1]))
+        raise Exception("Unsupported yet!")
+        # params = []
+        # for i in range(len(neuron_numbers)-1):
+        #     if i == 0:
+        #         params.append(nn.Linear(neuron_numbers[i],neuron_numbers[i+1]))
+        #     elif i == len(neuron_numbers)-2:
+        #         params.append(nn.Linear(neuron_numbers[i],neuron_numbers[i+1]))
+        #     else:
+        #         params.append(nn.Linear(neuron_numbers[i],neuron_numbers[i+1]))
 
         
 
@@ -77,7 +78,9 @@ class network(NeuralNetwork):
     def _multi_dimention_list_to_numpy_array(self, lst:list):
         return np.array([np.array(l) for l in lst])
                 
-        
+    def set_stack(self, stack : nn.Sequential):
+        self.stack = stack
+    
 
     def _create_dataloaders(
             self, 
@@ -89,16 +92,19 @@ class network(NeuralNetwork):
             batch_size=None
     ):
 
+        # Convert lists to numpy arrays
         trainX = self._multi_dimention_list_to_numpy_array(trainX)
         trainY = self._multi_dimention_list_to_numpy_array(trainY)
         
-        print(trainX)
-        print(trainY)
-        train_tensor_x = torch.Tensor(np.array(trainX)) 
-        train_tensor_y = torch.Tensor(np.array(trainY))
+        # Convert arrays to tensors
+        train_tensor_x = torch.Tensor(trainX)
+        train_tensor_y = torch.Tensor(trainY)
+
+        # Create TensorDataset and DataLoader
         train_dataset = TensorDataset(train_tensor_x, train_tensor_y)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size)
 
+        # Handle test data
         test_dataloader = None
         if testing:
             test_tensor_x = torch.Tensor(np.array(testX))
@@ -125,17 +131,20 @@ class network(NeuralNetwork):
 
         # Initial argument checks:
 
+        # Compare input lists lengths
         assert len(trainX) == len(trainY), f"Length of trainX {len(trainX)} does not match trainY length ({len(trainY)})"
 
+        # Check if testing data is defined
         if not testX or not testY:
             testing = False
         else:
             raise Exception("Automatic test validation not supported yet!")
 
+        # Set device automatically
         if device == "auto":
             device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
         
-
+        # Handle batch size argument
         if batch_size != None:
             raise Exception("Custom batch size unsupported yet!")
         
@@ -155,10 +164,6 @@ class network(NeuralNetwork):
         print("Done!")
 
     
-    
-
-    def set_stack(self, stack : nn.Sequential):
-        self.stack = stack
     
         
 
