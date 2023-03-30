@@ -1,4 +1,4 @@
 # PyTorchLab
 Easy to use PyTorch training framework with a single fit/train method
 
-Progress : Project in Developtment
+Progress : Basic functionality working
