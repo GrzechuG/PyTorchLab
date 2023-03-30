@@ -123,6 +123,15 @@ class network(NeuralNetwork):
         return train_dataloader, test_dataloader
 
 
+    def sim(self, X):
+        X = self._multi_dimention_list_to_numpy_array(X)
+        
+        # Convert arrays to tensors
+        train_tensor_x = torch.Tensor(X)
+        pred = self(train_tensor_x)
+        return pred.tolist()
+    
+
     def fit(
             self, 
             trainX : list, 
@@ -134,7 +143,8 @@ class network(NeuralNetwork):
             batch_size=None,
             loss_function = nn.MSELoss(),
             optimizer_class : Optimizer = torch.optim.AdamW,
-            device = "auto"
+            device = "auto",
+            learning_rate = 0.001
     ):
 
         # Initial argument checks:
@@ -161,14 +171,14 @@ class network(NeuralNetwork):
         model = self.to(device)
 
         # Initialize optimizer:
-        optimizer = optimizer_class(model.parameters())
+        optimizer = optimizer_class(model.parameters(), lr=learning_rate)
 
         # Looping throught epochs (training):
         for t in range(epochs):
             print(f"Epoch {t+1}\n-------------------------------")
             self._train(train_dataloader, loss_function, optimizer, device)
             if testing:
-                self._test(test_dataloader, model, loss_fn)
+                self._test(test_dataloader, model, loss_function)
         print("Done!")
 
     
