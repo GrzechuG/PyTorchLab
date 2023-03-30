@@ -81,6 +81,14 @@ class network(NeuralNetwork):
     def set_stack(self, stack : nn.Sequential):
         self.stack = stack
     
+    def save(self, path : str):
+        torch.save(self.state_dict(), path)
+        print(f"Saved PyTorch Model State to {path}")
+    
+    def load(self, path : str):
+        self.load_state_dict(torch.load(path))
+        print("Loaded model!")
+    
 
     def _create_dataloaders(
             self, 
@@ -117,8 +125,8 @@ class network(NeuralNetwork):
 
     def fit(
             self, 
-            trainX, 
-            trainY, 
+            trainX : list, 
+            trainY : list, 
             testX=[], 
             testY=[], 
             testing = True, 
