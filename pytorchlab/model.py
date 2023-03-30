@@ -1,14 +1,13 @@
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
-from torchvision import datasets
-from torchvision.transforms import ToTensor
-
+from torch.optim.optimizer import Optimizer
+import numpy as np
 
 class NeuralNetwork(nn.Module):
         def __init__(self):
             super().__init__()
-            self.flatten = nn.Flatten()
+            # self.flatten = nn.Flatten()
             self.stack = nn.Sequential(
                 # nn.Linear(28*28, 512),
                 # nn.ReLU(),
@@ -19,7 +18,7 @@ class NeuralNetwork(nn.Module):
 
 
         def forward(self, x):
-            x = self.flatten(x)
+            # x = self.flatten(x)
             logits = self.stack(x)
             return logits
 
@@ -50,7 +49,8 @@ class network(NeuralNetwork):
         # neuron_numbers = [len(input_ranges)] + network_info
 
     
-    def _train(self, dataloader, model, loss_fn, optimizer):
+    def _train(self, dataloader, loss_fn, optimizer, device):
+        model = self.to(device)
         size = len(dataloader.dataset)
         model.train()
         for batch, (X, y) in enumerate(dataloader):
@@ -69,6 +69,16 @@ class network(NeuralNetwork):
                 loss, current = loss.item(), (batch + 1) * len(X)
                 print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
+
+    def _test(self):
+        raise Exception("testing not supported yet!")
+
+
+    def _multi_dimention_list_to_numpy_array(self, lst:list):
+        return np.array([np.array(l) for l in lst])
+                
+        
+
     def _create_dataloaders(
             self, 
             trainX, 
@@ -78,22 +88,26 @@ class network(NeuralNetwork):
             testing = True,
             batch_size=None
     ):
-        train_tensor_x = torch.Tensor(np.array(testX)) 
+
+        trainX = self._multi_dimention_list_to_numpy_array(trainX)
+        trainY = self._multi_dimention_list_to_numpy_array(trainY)
+        
+        print(trainX)
+        print(trainY)
+        train_tensor_x = torch.Tensor(np.array(trainX)) 
         train_tensor_y = torch.Tensor(np.array(trainY))
-
-        if testing:
-            train_tensor_x = torch.Tensor(np.array(testX))
-            train_tensor_y = torch.Tensor(np.array(trainY))
-
         train_dataset = TensorDataset(train_tensor_x, train_tensor_y)
         train_dataloader = DataLoader(train_dataset, batch_size=batch_size)
 
         test_dataloader = None
         if testing:
+            test_tensor_x = torch.Tensor(np.array(testX))
+            test_tensor_y = torch.Tensor(np.array(testY))
             test_dataset = TensorDataset(train_tensor_x, train_tensor_y)
             test_dataloader = DataLoader(test_dataset, batch_size=batch_size)
 
         return train_dataloader, test_dataloader
+
 
     def fit(
             self, 
@@ -103,30 +117,47 @@ class network(NeuralNetwork):
             testY=[], 
             testing = True, 
             epochs=500,
-            batch_size=None
+            batch_size=None,
+            loss_function = nn.MSELoss(),
+            optimizer_class : Optimizer = torch.optim.AdamW,
+            device = "auto"
     ):
+
+        # Initial argument checks:
+
+        assert len(trainX) == len(trainY), f"Length of trainX {len(trainX)} does not match trainY length ({len(trainY)})"
 
         if not testX or not testY:
             testing = False
+        else:
+            raise Exception("Automatic test validation not supported yet!")
 
+        if device == "auto":
+            device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+        
+
+        if batch_size != None:
+            raise Exception("Custom batch size unsupported yet!")
+        
         # Create dataloaders:
         train_dataloader, test_dataloader = self._create_dataloaders(trainX, trainY)
-        
-        
-        
-        
+        model = self.to(device)
 
-        # for X, y in test_dataloader:
-        #     print(f"Shape of X [N, C, H, W]: {X.shape}")
-        #     print(f"Shape of y: {y.shape} {y.dtype}")
-        #     break
-        # pass
+        # Initialize optimizer:
+        optimizer = optimizer_class(model.parameters())
 
-    def train(self, trainX, trainY, epochs=500):
-        return self.fit(trainX, trainY, epochs=500)
+        # Looping throught epochs (training):
+        for t in range(epochs):
+            print(f"Epoch {t+1}\n-------------------------------")
+            self._train(train_dataloader, loss_function, optimizer, device)
+            if testing:
+                self._test(test_dataloader, model, loss_fn)
+        print("Done!")
+
+    
     
 
-    def set_stack(stack : nn.Sequential):
+    def set_stack(self, stack : nn.Sequential):
         self.stack = stack
     
         
