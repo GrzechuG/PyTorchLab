@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from torch.optim.optimizer import Optimizer
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 
 class NeuralNetwork(nn.Module):
@@ -35,12 +36,12 @@ class network(NeuralNetwork):
         super().__init__()
 
     def update_validation_history(self, last_validation_error):
-        self.validation_error_history.append(last_validation_error)
+        self.validation_error_history.append(float(last_validation_error))
         if min(self.validation_error_history) == last_validation_error:
             self.best_model_validation = self.state_dict().copy()
         
     def update_train_history(self, last_train_error):
-        self.train_error_history.append(last_train_error)
+        self.train_error_history.append(float(last_train_error))
         
 
     def create_stack(neuron_numbers):
@@ -69,6 +70,7 @@ class network(NeuralNetwork):
         model = self.to(device)
         size = len(dataloader.dataset)
         model.train()
+        
         for batch, (X, y) in enumerate(dataloader):
             X, y = X.to(device), y.to(device)
 
@@ -81,10 +83,10 @@ class network(NeuralNetwork):
             loss.backward()
             optimizer.step()
 
-            loss, current = loss.item(), (batch + 1) * len(X)
-            self.update_train_history(loss)
-            if batch % 100 == 0:
-                print(f"[Training] loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+        # If batch size = number of samples that is ok, else it would be last sample error
+        loss = loss.item()
+        self.update_train_history(loss)
+        print(f"[Training] loss: {loss:>7f}")
 
 
     def _test(self):
@@ -100,11 +102,9 @@ class network(NeuralNetwork):
             pred = model(X)
             loss = loss_fn(pred, y)
             
-            loss, current = loss.item(), (batch + 1) * len(X)
-
-            self.update_validation_history(loss)
-            if batch % 100 == 0:    
-                print(f"[Validation] loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+        loss = loss.item()
+        self.update_validation_history(loss)
+        print(f"[Validation] loss: {loss:>7f}")
         
 
     def plot(self, validation=False):
@@ -126,8 +126,12 @@ class network(NeuralNetwork):
         torch.save(self.state_dict(), path)
         print(f"Saved PyTorch Model State to {path}")
 
-    def save_error_hist(self):
-        pass
+    def save_error_hist(self, path:str , validation=False):
+        open(path, "w+").write(json.dumps(self.train_error_history))
+
+        if validation:
+            open(path, "a").write(json.dumps(self.validation_error_history))
+        
     
     def load(self, path : str):
         self.load_state_dict(torch.load(path))
