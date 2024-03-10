@@ -30,6 +30,7 @@ class network(NeuralNetwork):
     def __init__(self):
         self.input_ranges = []
         self.best_model_validation = {}
+        self.best_model_error = {"validation_error" : None}
         self.validation_error_history = []
         self.train_error_history = []
 
@@ -39,10 +40,16 @@ class network(NeuralNetwork):
         self.validation_error_history.append(float(last_validation_error))
         if min(self.validation_error_history) == last_validation_error:
             self.best_model_validation = self.state_dict().copy()
+            self.best_model_error["validation_error"] = last_validation_error
+
         
     def update_train_history(self, last_train_error):
         self.train_error_history.append(float(last_train_error))
+    
+    def revert_to_best(self):
+        self.load_state_dict(self.best_model_validation)
         
+    
 
     def create_stack(neuron_numbers):
         raise Exception("Unsupported yet!")
