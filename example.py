@@ -15,10 +15,16 @@ net.set_stack(
     )
 )
 
-net.fit([[1,0,1,0]]*100, [[0,1,0,1]]*100, batch_size=64)
+net.fit([[1,0,1,0]]*100, [[0,1,0,1]]*100,validationX=[[1,0,1,0]]*100, validationY=[[0,1,0,1]]*100, batch_size=64)
+
+net.plot(validation=True)
+
 
 net.save("model.pt")
 
 net.load("model.pt")
+
+
+
 
 print(net.sim([1,0,1,0]))
