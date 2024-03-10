@@ -108,10 +108,10 @@ class network(NeuralNetwork):
         
 
     def plot(self, validation=False):
-        t = range(len(self.train_error_history))
-        plt.plot(self.train_error_history, t)
+        # t = range(len(self.train_error_history))
+        plt.plot(self.train_error_history)
         if validation:
-            plt.plot(self.validation_error_history, t)
+            plt.plot(self.validation_error_history)
 
         plt.show()
 
