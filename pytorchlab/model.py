@@ -122,9 +122,17 @@ class network(NeuralNetwork):
     def set_stack(self, stack : nn.Sequential):
         self.stack = stack
     
-    def save(self, path : str):
+    def save_last(self, path : str):
         torch.save(self.state_dict(), path)
         print(f"Saved PyTorch Model State to {path}")
+
+    def save(self, path : str):
+        self.save_last(path)
+    
+    def save_best_validation(self, path):
+        torch.save(self.best_model_validation, path)
+        print(f"Saved PyTorch Model State to {path}")
+
 
     def save_error_hist(self, path:str , validation=False):
         
