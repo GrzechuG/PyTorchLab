@@ -21,6 +21,7 @@ net.plot(validation=True)
 
 
 net.save("model.pt")
+net.save_error_hist("error_hist.json")
 
 net.load("model.pt")
 

@@ -127,11 +127,13 @@ class network(NeuralNetwork):
         print(f"Saved PyTorch Model State to {path}")
 
     def save_error_hist(self, path:str , validation=False):
-        open(path, "w+").write(json.dumps(self.train_error_history))
-
-        if validation:
-            open(path, "a").write(json.dumps(self.validation_error_history))
         
+        to_save = {"train_history" : self.train_error_history}
+        if validation:
+            to_save["validation_history"] = self.validation_error_history
+
+        open(path, "w+").write(json.dumps(to_save))
+
     
     def load(self, path : str):
         self.load_state_dict(torch.load(path))
